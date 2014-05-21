@@ -85,6 +85,9 @@
 		<component>
 			<implementation-class>krasa.grepconsole.plugin.GrepConsoleApplicationComponent</implementation-class>
 		</component>
+		<component>
+			<implementation-class>krasa.grepconsole.remotecall.GrepConsoleRemoteCallComponent</implementation-class>
+		</component>
 	</application-components>
 
 	<project-components>
