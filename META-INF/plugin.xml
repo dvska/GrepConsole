@@ -1,7 +1,7 @@
 <idea-plugin version="2">
 	<id>GrepConsole</id>
 	<name>Grep Console</name>
-	<version>4.2.134.1007</version>
+	<version>4.3.134.1007</version>
 
 	<vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech
 		Krasa
@@ -15,7 +15,10 @@
 	 		<br>
 	 		Additional Features:<br>
 	 		ANSI colouring<br>
-	 		File tailing: Main menu | Tools | Open File in Console<br>
+	 		File Tailing:<br>
+	 		- Main menu | Tools | Open File in Console<br>
+	 		- Drag&Drop "Tail File" panel in main toolbar<br>
+	 		- http and Windows context menu integration<br>
 	 		<br>
 			Inspired by <a href="http://marian.schedenig.name/projects/grep-console/">Grep Console plugin for Eclipse</a>
 			and <a href="http://mihai-nita.net/2013/06/03/eclipse-plugin-ansi-in-console/">Ansi Console plugin for Eclipse</a>.
@@ -24,6 +27,9 @@
       ]]></description>
 
 	<change-notes><![CDATA[        
+        <br>4.3 (2014-05-22)
+        <br>- http and Windows context menu integration for File Tailing
+        <br>- closing File Tailing without confirmation dialog
         <br>4.2 (2014-05-19)
         <br>- drag&drop main toolbar panel for tailing
         <br>4.1 (2014-05-13)
@@ -34,7 +40,7 @@
         <br>- enable Apply button in settings immediately after color change 
         <br>- memory leak fix
         <br>3.8 (2014-04-24)
-        <br>- PhpStorm tail file fix
+        <br>- PhpStorm File Tailing fix
         <br>- moved editor context actions into Tools
         <br>3.7 (2014-04-22)
         <br>- usability improvements

@@ -3,7 +3,6 @@ package krasa.grepconsole.gui;
 import static krasa.grepconsole.Cloner.deepClone;
 
 import java.awt.event.*;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,17 +11,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.NumberFormatter;
 
-import krasa.grepconsole.integration.windows.WindowsRegistryChange;
-import krasa.grepconsole.model.GrepExpressionItem;
-import krasa.grepconsole.model.Profile;
-import krasa.grepconsole.plugin.DefaultState;
-import krasa.grepconsole.plugin.PluginState;
+import krasa.grepconsole.model.*;
+import krasa.grepconsole.plugin.*;
+import krasa.grepconsole.remotecall.GrepConsoleRemoteCallComponent;
 
 import com.centerkey.utils.BareBonesBrowserLaunch;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.ui.JBPopupMenu;
+import com.intellij.openapi.ui.*;
 import com.intellij.ui.table.TableView;
-import com.intellij.util.PathUtil;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 
@@ -46,12 +42,12 @@ public class SettingsDialog {
 	private JButton DONATEButton;
 	private JCheckBox showStatsInConsoleByDefault;
 	private JCheckBox showStatsInStatusBarByDefault;
-	private JButton integrateContextMenu;
+	private JButton fileTailSettings;
 	private PluginState settings;
 	protected ListTableModel<GrepExpressionItem> model;
 	protected Integer selectedRow;
 
-	public SettingsDialog(final PluginState settings) {
+	public SettingsDialog(PluginState settings) {
 		this.settings = settings;
 		DONATEButton.setBorder(BorderFactory.createEmptyBorder());
 		DONATEButton.setContentAreaFilled(false);
@@ -185,41 +181,35 @@ public class SettingsDialog {
 				}
 			}
 		});
-		integrateContextMenu.addActionListener(new ActionListener() {
 
+		fileTailSettings.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				final String jarPathForClass = PathUtil.getJarPathForClass(this.getClass());
-				if (isDevMode(jarPathForClass)) {
-					log.info("dev mode, jarPathForClass=" + jarPathForClass);
-					final File file = new File(jarPathForClass + "/../lib/http-client.jar");
-					if (!file.exists()) {
-						log.error(file.getAbsolutePath() + " does not exists");
-						return;
-					}
-					WindowsRegistryChange.setup(file.getAbsolutePath());
-				} else {
-					log.info("production mode, jarPathForClass=" + jarPathForClass);
-					final File file = getFile(jarPathForClass);
+				final IntegrationForm form = new IntegrationForm();
+				form.setData(getTailSettings());
 
-					if (!file.exists() || !file.getName().equals("http-client.jar")) {
-						log.error(jarPathForClass);
-						return;
-					}
-					WindowsRegistryChange.setup(file.getAbsolutePath());
+				DialogBuilder builder = new DialogBuilder(SettingsDialog.this.getRootComponent());
+				builder.setCenterPanel(form.getRoot());
+				builder.setDimensionServiceKey("GrepConsoleTailFileDialog");
+				builder.setTitle("Tail File settings");
+				builder.removeAllActions();
+				builder.addOkAction();
+				builder.addCancelAction();
+
+				boolean isOk = builder.show() == DialogWrapper.OK_EXIT_CODE;
+				if (isOk) {
+					form.getData(getTailSettings());
+					GrepConsoleApplicationComponent.getInstance().getState().setTailSettings(getTailSettings());
+					final GrepConsoleRemoteCallComponent instance = GrepConsoleRemoteCallComponent.getInstance();
+					instance.disposeComponent();
+					instance.initComponent();
 				}
 			}
-
-			private File getFile(String jarPathForClass) {
-				// F:\workspace\.IntelliJIdea12\config\plugins\GrepConsole\lib\GrepConsole.jar
-				final File parentFile = new File(jarPathForClass).getParentFile();
-				return new File(parentFile, "http-client.jar");
-			}
-
-			private boolean isDevMode(String jarPathForClass) {
-				return jarPathForClass.endsWith("classes");
-			}
 		});
+	}
+
+	private TailSettings getTailSettings() {
+		return settings.getTailSettings();
 	}
 
 	private void delete() {
@@ -274,6 +264,7 @@ public class SettingsDialog {
 	}
 
 	private void createUIComponents() {
+		fileTailSettings = new JButton();
 		NumberFormatter numberFormatter = new NumberFormatter();
 		numberFormatter.setMinimum(0);
 		maxLengthToMatch = new JFormattedTextField(numberFormatter);

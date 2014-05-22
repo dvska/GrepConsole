@@ -27,7 +27,7 @@
       </scrollpane>
       <component id="71e08" class="javax.swing.JFormattedTextField" binding="maxLengthToMatch" custom-create="true">
         <constraints>
-          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value=""/>
@@ -114,14 +114,6 @@
           <text value="Delete"/>
         </properties>
       </component>
-      <component id="266fb" class="javax.swing.JButton" binding="resetToDefaultButton" default-binding="true">
-        <constraints>
-          <grid row="5" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Reset to default"/>
-        </properties>
-      </component>
       <component id="6106" class="javax.swing.JCheckBox" binding="showStatsInStatusBarByDefault">
         <constraints>
           <grid row="2" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -163,12 +155,20 @@
           <text value="Hide ANSI commands"/>
         </properties>
       </component>
-      <component id="14c68" class="javax.swing.JButton" binding="integrateContextMenu">
+      <component id="14c68" class="javax.swing.JButton" binding="fileTailSettings">
         <constraints>
-          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="5" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Integrate with Windows"/>
+          <text value="Tail File settings"/>
+        </properties>
+      </component>
+      <component id="266fb" class="javax.swing.JButton" binding="resetToDefaultButton" default-binding="true">
+        <constraints>
+          <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Reset to default"/>
         </properties>
       </component>
     </children>

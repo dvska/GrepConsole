@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
+import krasa.grepconsole.model.TailSettings;
+import krasa.grepconsole.plugin.GrepConsoleApplicationComponent;
 import krasa.grepconsole.remotecall.handler.OpenFileInConsoleMessageHandler;
 import krasa.grepconsole.remotecall.notifier.MessageNotifier;
 import krasa.grepconsole.remotecall.notifier.SocketMessageNotifier;
@@ -14,30 +16,30 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.util.SystemProperties;
 
 public class GrepConsoleRemoteCallComponent implements ApplicationComponent {
 	private static final Logger log = Logger.getInstance(GrepConsoleRemoteCallComponent.class);
-	public static final String GREPCONSOLE_REMOTE_CALL_PORT = "grepconsole.remote.call.port";
-	public static final int DEFAULT_VALUE = 8092;
 
 	private ServerSocket serverSocket;
 	private Thread listenerThread;
 
 	public void initComponent() {
-		final int port = SystemProperties.getIntProperty(GREPCONSOLE_REMOTE_CALL_PORT, DEFAULT_VALUE);
+		final TailSettings tailSettings = GrepConsoleApplicationComponent.getInstance().getState().getTailSettings();
+		if (!tailSettings.isEnabled()) {
+			return;
+		}
 		try {
+			int port = Integer.parseInt(tailSettings.getPort());
 			serverSocket = new ServerSocket();
 			serverSocket.bind(new InetSocketAddress("localhost", port));
 			log.info("Listening " + port);
-		} catch (IOException e) {
+		} catch (final Exception e) {
 			ApplicationManager.getApplication().invokeLater(new Runnable() {
 				public void run() {
 					Messages.showMessageDialog(
-							"Can't bind with "
-									+ port
-									+ " port. GrepConsole plugin Windows integration won't work (to change port, set property grepconsole.remote.call.port)",
-							"GrepConsole Plugin Error", Messages.getErrorIcon());
+							"Can't bind port " + tailSettings.getPort()
+									+ ". GrepConsole plugin external integration for Tail File won't work. error: "
+									+ e.toString(), "GrepConsole Plugin Error", Messages.getErrorIcon());
 				}
 			});
 			return;
@@ -54,7 +56,9 @@ public class GrepConsoleRemoteCallComponent implements ApplicationComponent {
 			if (listenerThread != null) {
 				listenerThread.interrupt();
 			}
-			serverSocket.close();
+			if (serverSocket != null) {
+				serverSocket.close();
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -64,4 +68,9 @@ public class GrepConsoleRemoteCallComponent implements ApplicationComponent {
 	public String getComponentName() {
 		return "GrepConsoleRemoteCallComponent";
 	}
+
+	public static GrepConsoleRemoteCallComponent getInstance() {
+		return ApplicationManager.getApplication().getComponent(GrepConsoleRemoteCallComponent.class);
+	}
+
 }

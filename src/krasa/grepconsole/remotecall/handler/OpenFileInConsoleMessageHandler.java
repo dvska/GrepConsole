@@ -1,17 +1,20 @@
 package krasa.grepconsole.remotecall.handler;
 
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
 
 import krasa.grepconsole.action.OpenFileInConsoleAction;
+import krasa.grepconsole.utils.FocusUtils;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.ui.NonEmptyInputValidator;
 import com.intellij.openapi.wm.IdeFrame;
 import com.intellij.openapi.wm.WindowManager;
+import com.intellij.openapi.wm.ex.WindowManagerEx;
+import com.intellij.openapi.wm.impl.IdeFrameImpl;
 
 /**
  * @author Vojtech Krasa
@@ -20,8 +23,6 @@ import com.intellij.openapi.wm.WindowManager;
 public class OpenFileInConsoleMessageHandler implements MessageHandler {
 	private static final Logger log = Logger.getInstance(OpenFileInConsoleMessageHandler.class);
 
-	protected String lastProject;
-
 	public void handleMessage(final String message) {
 		if (message != null && !message.isEmpty()) {
 			log.info("Opening file=" + message);
@@ -29,27 +30,46 @@ public class OpenFileInConsoleMessageHandler implements MessageHandler {
 				public void run() {
 					IdeFrame[] allProjectFrames = WindowManager.getInstance().getAllProjectFrames();
 					List<String> values = getValues(allProjectFrames);
-					final String s;
+					String selectedProject = null;
 					if (values.size() > 1) {
-						if (lastProject == null) {
-							lastProject = values.get(0);
+						String initialProject = getInitialProject(values);
+
+						int i = Messages.showChooseDialog("Select Project Frame", "Select Project Frame",
+								values.toArray(new String[values.size()]), initialProject, Messages.getQuestionIcon());
+						if (i >= 0) {
+							selectedProject = values.get(i);
 						}
-						s = Messages.showEditableChooseDialog("Project frame", "Project Frame",
-								Messages.getQuestionIcon(), values.toArray(new String[values.size()]), lastProject,
-								new NonEmptyInputValidator());
+
 					} else if (values.size() == 1) {
-						s = values.get(0);
+						selectedProject = values.get(0);
 					} else {
 						log.warn("Cannot open file, no projects opened");
 						return;
 					}
-					if (s != null) {
-						lastProject = s;
-						Project project1 = getProject(allProjectFrames, s);
-						if (project1 != null) {
-							new OpenFileInConsoleAction().openFileInConsole(project1, message);
+					if (selectedProject != null) {
+						Project project = getProject(allProjectFrames, selectedProject);
+						if (project != null) {
+							new OpenFileInConsoleAction().openFileInConsole(project, message);
 						}
 					}
+				}
+
+				public String getInitialProject(List<String> values) {
+					WindowManagerEx instance = (WindowManagerEx) WindowManager.getInstance();
+					Window focusedWindow = instance.getMostRecentFocusedWindow();
+					String initialProject = null;
+					if (focusedWindow instanceof IdeFrameImpl) {
+						Project project = ((IdeFrameImpl) focusedWindow).getProject();
+						if (project != null) {
+							initialProject = project.getName();
+							FocusUtils.requestFocus(project);
+						}
+					}
+
+					if (initialProject == null) {
+						initialProject = values.get(0);
+					}
+					return initialProject;
 				}
 
 				private List<String> getValues(IdeFrame[] allProjectFrames) {
@@ -61,6 +81,7 @@ public class OpenFileInConsoleMessageHandler implements MessageHandler {
 							values.add(project.getName());
 						}
 					}
+					Collections.sort(values);
 					return values;
 				}
 
