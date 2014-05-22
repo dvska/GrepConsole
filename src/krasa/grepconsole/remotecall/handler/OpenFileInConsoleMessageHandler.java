@@ -22,6 +22,7 @@ import com.intellij.openapi.wm.impl.IdeFrameImpl;
 
 public class OpenFileInConsoleMessageHandler implements MessageHandler {
 	private static final Logger log = Logger.getInstance(OpenFileInConsoleMessageHandler.class);
+	protected String lastProject;
 
 	public void handleMessage(final String message) {
 		if (message != null && !message.isEmpty()) {
@@ -32,7 +33,7 @@ public class OpenFileInConsoleMessageHandler implements MessageHandler {
 					List<String> values = getValues(allProjectFrames);
 					String selectedProject = null;
 					if (values.size() > 1) {
-						String initialProject = getInitialProject(values);
+						String initialProject = getInitiallySelectedProject(values);
 
 						int i = Messages.showChooseDialog("Select Project Frame", "Select Project Frame",
 								values.toArray(new String[values.size()]), initialProject, Messages.getQuestionIcon());
@@ -47,6 +48,7 @@ public class OpenFileInConsoleMessageHandler implements MessageHandler {
 						return;
 					}
 					if (selectedProject != null) {
+						lastProject = selectedProject;
 						Project project = getProject(allProjectFrames, selectedProject);
 						if (project != null) {
 							new OpenFileInConsoleAction().openFileInConsole(project, message);
@@ -54,7 +56,7 @@ public class OpenFileInConsoleMessageHandler implements MessageHandler {
 					}
 				}
 
-				public String getInitialProject(List<String> values) {
+				public String getInitiallySelectedProject(List<String> values) {
 					WindowManagerEx instance = (WindowManagerEx) WindowManager.getInstance();
 					Window focusedWindow = instance.getMostRecentFocusedWindow();
 					String initialProject = null;
@@ -67,6 +69,9 @@ public class OpenFileInConsoleMessageHandler implements MessageHandler {
 					}
 
 					if (initialProject == null) {
+						initialProject = lastProject;
+					}
+					if (initialProject == null || !values.contains(initialProject)) {
 						initialProject = values.get(0);
 					}
 					return initialProject;
