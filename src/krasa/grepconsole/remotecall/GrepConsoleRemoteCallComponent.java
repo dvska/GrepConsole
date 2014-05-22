@@ -25,8 +25,13 @@ public class GrepConsoleRemoteCallComponent implements ApplicationComponent {
 
 	public void initComponent() {
 		final TailSettings tailSettings = GrepConsoleApplicationComponent.getInstance().getState().getTailSettings();
+		rebind(tailSettings);
+	}
+
+	public boolean rebind(final TailSettings tailSettings) {
+		disposeComponent();
 		if (!tailSettings.isEnabled()) {
-			return;
+			return false;
 		}
 		try {
 			int port = Integer.parseInt(tailSettings.getPort());
@@ -42,22 +47,26 @@ public class GrepConsoleRemoteCallComponent implements ApplicationComponent {
 									+ e.toString(), "GrepConsole Plugin Error", Messages.getErrorIcon());
 				}
 			});
-			return;
+			log.info("GrepConsole Plugin Error", e);
+			return false;
 		}
 
 		MessageNotifier messageNotifier = new SocketMessageNotifier(serverSocket);
 		messageNotifier.addMessageHandler(new OpenFileInConsoleMessageHandler());
 		listenerThread = new Thread(messageNotifier);
 		listenerThread.start();
+		return true;
 	}
 
 	public void disposeComponent() {
 		try {
 			if (listenerThread != null) {
 				listenerThread.interrupt();
+				listenerThread = null;
 			}
 			if (serverSocket != null) {
 				serverSocket.close();
+				serverSocket = null;
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

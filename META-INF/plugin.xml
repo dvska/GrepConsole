@@ -18,17 +18,16 @@
 	 		File Tailing:<br>
 	 		- Main menu | Tools | Open File in Console<br>
 	 		- Drag&Drop "Tail File" panel in main toolbar<br>
-	 		- http and Windows context menu integration<br>
+	 		- Windows context menu integration<br>
 	 		<br>
 			Inspired by <a href="http://marian.schedenig.name/projects/grep-console/">Grep Console plugin for Eclipse</a>
-			and <a href="http://mihai-nita.net/2013/06/03/eclipse-plugin-ansi-in-console/">Ansi Console plugin for Eclipse</a>.
-			
-			 
+			and <a href="http://mihai-nita.net/2013/06/03/eclipse-plugin-ansi-in-console/">Ansi Console plugin for Eclipse</a>.<br>
+			Used <a href="http://plugins.jetbrains.com/plugin/6027?pr=idea">Remote call plugin</a> implementation for Windows integration.<br>
       ]]></description>
 
 	<change-notes><![CDATA[        
         <br>4.3 (2014-05-22)
-        <br>- http and Windows context menu integration for File Tailing
+        <br>- Windows context menu integration for File Tailing
         <br>- closing File Tailing without confirmation dialog
         <br>4.2 (2014-05-19)
         <br>- drag&drop main toolbar panel for tailing
@@ -56,24 +55,6 @@
         <br>- improved color chooser
         <br>3.3 (2014-03-21)
         <br>- Match only first N characters on each line fixed for 1000+
-        <br>3.2 (2014-02-10)
-        <br>- API change
-        <br>3.1 (2013-12-30)
-        <br>- new action for tailing currently opened file - Main menu | Tools | Open Current File in Console
-        <br>3.0 (2013-12-29)
-        <br>- new action for tailing files - Main menu | Tools | Open File in Console
-        <br>2.9 (2013-12-13)
-        <br>- fixed settings table drag&drop
-        <br>2.8 (2013-08-21)
-        <br>- new option to continue matching - multiple styles can be combined for a single line
-        <br>2.7 (2013-07-01)
-        <br>- import/export of settings
-        <br>2.6.1 (2013-06-25)
-        <br>- minor settings improvements
-        <br>2.6 (2013-04-05)
-        <br>- ANSI bugfix
-        <br>2.5 (2013-04-03)
-        <br>- table drag&drop
         <br>0.1 (2012-11-13)
         <br>- Initial release
 			]]>

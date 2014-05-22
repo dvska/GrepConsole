@@ -23,17 +23,21 @@ import com.intellij.openapi.wm.impl.IdeFrameImpl;
 public class OpenFileInConsoleMessageHandler implements MessageHandler {
 	private static final Logger log = Logger.getInstance(OpenFileInConsoleMessageHandler.class);
 	protected String lastProject;
+	protected Date lastProjectSet;
 
 	public void handleMessage(final String message) {
 		if (message != null && !message.isEmpty()) {
 			log.info("Opening file=" + message);
+			final Date date = new Date();
+
 			ApplicationManager.getApplication().invokeLater(new Runnable() {
 				public void run() {
 					IdeFrame[] allProjectFrames = WindowManager.getInstance().getAllProjectFrames();
 					List<String> values = getValues(allProjectFrames);
 					String selectedProject = null;
+
 					if (values.size() > 1) {
-						String initialProject = getInitiallySelectedProject(values);
+						String initialProject = getInitiallySelectedProject(values, date);
 
 						int i = Messages.showChooseDialog("Select Project Frame", "Select Project Frame",
 								values.toArray(new String[values.size()]), initialProject, Messages.getQuestionIcon());
@@ -49,6 +53,7 @@ public class OpenFileInConsoleMessageHandler implements MessageHandler {
 					}
 					if (selectedProject != null) {
 						lastProject = selectedProject;
+						lastProjectSet = new Date();
 						Project project = getProject(allProjectFrames, selectedProject);
 						if (project != null) {
 							new OpenFileInConsoleAction().openFileInConsole(project, message);
@@ -56,11 +61,20 @@ public class OpenFileInConsoleMessageHandler implements MessageHandler {
 					}
 				}
 
-				public String getInitiallySelectedProject(List<String> values) {
+				public String getInitiallySelectedProject(List<String> values, Date date) {
 					WindowManagerEx instance = (WindowManagerEx) WindowManager.getInstance();
 					Window focusedWindow = instance.getMostRecentFocusedWindow();
 					String initialProject = null;
-					if (focusedWindow instanceof IdeFrameImpl) {
+
+					// multiple files opened at once
+					if (lastProjectSet != null && date.getTime() < lastProjectSet.getTime()) {
+						if (values.contains(lastProject)) {
+							initialProject = lastProject;
+						}
+					}
+
+					// current frame
+					if (initialProject == null && focusedWindow instanceof IdeFrameImpl) {
 						Project project = ((IdeFrameImpl) focusedWindow).getProject();
 						if (project != null) {
 							initialProject = project.getName();
@@ -68,9 +82,12 @@ public class OpenFileInConsoleMessageHandler implements MessageHandler {
 						}
 					}
 
+					// floating window
 					if (initialProject == null) {
 						initialProject = lastProject;
 					}
+
+					// nothing worked or project closed
 					if (initialProject == null || !values.contains(initialProject)) {
 						initialProject = values.get(0);
 					}

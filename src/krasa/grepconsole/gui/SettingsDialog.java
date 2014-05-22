@@ -13,7 +13,6 @@ import javax.swing.text.NumberFormatter;
 
 import krasa.grepconsole.model.*;
 import krasa.grepconsole.plugin.*;
-import krasa.grepconsole.remotecall.GrepConsoleRemoteCallComponent;
 
 import com.centerkey.utils.BareBonesBrowserLaunch;
 import com.intellij.openapi.diagnostic.Logger;
@@ -200,9 +199,7 @@ public class SettingsDialog {
 				if (isOk) {
 					form.getData(getTailSettings());
 					GrepConsoleApplicationComponent.getInstance().getState().setTailSettings(getTailSettings());
-					final GrepConsoleRemoteCallComponent instance = GrepConsoleRemoteCallComponent.getInstance();
-					instance.disposeComponent();
-					instance.initComponent();
+					form.rebind(getTailSettings());
 				}
 			}
 		});

@@ -8,10 +8,13 @@ import java.util.Arrays;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 
-import krasa.grepconsole.integration.windows.WindowsRegistryChange;
+import krasa.grepconsole.integration.WindowsRegistryChange;
 import krasa.grepconsole.model.TailSettings;
+import krasa.grepconsole.remotecall.GrepConsoleRemoteCallComponent;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.util.PathUtil;
@@ -24,6 +27,7 @@ public class IntegrationForm {
 	private JButton windowsIntegration;
 	private JLabel windowsIntegrationLabel;
 	private JTextArea openFileInConsoleTextArea;
+	private JButton bindButton;
 
 	public IntegrationForm() {
 		for (JToggleButton button : Arrays.asList(listenOnPortCheckBox)) {
@@ -45,24 +49,51 @@ public class IntegrationForm {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (WindowsRegistryChange.isSetupped(getJarPath(), getPort())) {
-					WindowsRegistryChange.remove();
-				} else {
-					String path = getJarPath();
-					if (path == null) {
-						return;
+				try {
+					if (WindowsRegistryChange.isSetupped(getJarPath(), getPort())) {
+						WindowsRegistryChange.remove();
+					} else {
+						String path = getJarPath();
+						if (path == null) {
+							return;
+						}
+						WindowsRegistryChange.setup(path, getPort());
+						listenOnPortCheckBox.setSelected(true);
 					}
-					WindowsRegistryChange.setup(path, getPort());
-					listenOnPortCheckBox.setSelected(true);
+				} catch (final Exception e1) {
+					ApplicationManager.getApplication().invokeLater(new Runnable() {
+						public void run() {
+							Messages.showMessageDialog("Windows integration error: " + e1.toString(),
+									"GrepConsole Plugin Error", Messages.getErrorIcon());
+						}
+					});
+					log.error("Windows integration error", e1);
 				}
 				updateComponents();
 			}
 
 		});
+		bindButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				TailSettings tailSettings = new TailSettings();
+				getData(tailSettings);
+				boolean rebind = rebind(tailSettings);
+				if (rebind) {
+					Messages.showMessageDialog("Rebind OK", "Rebind OK", Messages.getInformationIcon());
+				}
+			}
+		});
+	}
+
+	public boolean rebind(TailSettings tailSettings) {
+		final GrepConsoleRemoteCallComponent instance = GrepConsoleRemoteCallComponent.getInstance();
+		return instance.rebind(tailSettings);
 	}
 
 	private void updateComponents() {
 		updateWindowsIntegration();
+		bindButton.setEnabled(listenOnPortCheckBox.isSelected());
 	}
 
 	private void updateWindowsIntegration() {
